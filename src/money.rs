@@ -1,6 +1,6 @@
-#[derive(PartialEq)]
+#[derive(PartialEq, Debug)]
 pub struct Dollar {
-    pub amount: i32,
+    amount: i32,
 }
 
 impl Dollar {
@@ -20,44 +20,26 @@ mod tests {
     use super::*;
 
     // TODO: $5 + 10 CHF = $10 (レートが2:1の場合)
-    // TODO: amountをプライベートにする
     // TODO: Moneyの丸め処理をどうする？
+    // TODO: 他のオブジェクトとの等価性比較
     #[test]
     fn test_multiplication() {
         // arrange
         let five = Dollar::new(5);
-
-        // act
-        let product = five.times(2);
-
-        // assert
-        assert_eq!(10, product.amount);
-
-        let product = five.times(3);
-
-        assert_eq!(15, product.amount);
+        // act+assert
+        assert_eq!(Dollar::new(10), five.times(2));
+        assert_eq!(Dollar::new(15), five.times(3));
     }
 
     #[test]
     fn test_equals() {
         // arrange
         let five = Dollar::new(5);
-        let five_2 = Dollar::new(5);
 
-        // act
-        let is_equal = five == five_2;
-
-        // assert
-        assert_eq!(true, is_equal);
-
-        // arrange
-        let one = Dollar::new(1);
-        // assert
-        let is_equal = five.amount == one.amount;
-        // act
-        assert_eq!(false, is_equal);
-
-        assert_eq!(true, Dollar::new(0) == Dollar::new(0));
-        assert_eq!(false, Dollar::new(1) == Dollar::new(10));
+        // act+assert
+        assert_eq!(five, Dollar::new(5));
+        assert_ne!(five, Dollar::new(1));
+        assert_eq!(Dollar::new(0), Dollar::new(0));
+        assert_ne!(Dollar::new(1), Dollar::new(10));
     }
 }
