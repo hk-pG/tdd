@@ -19,9 +19,7 @@ mod tests {
     use super::*;
 
     // TODO: $5 + 10 CHF = $10 (レートが2:1の場合)
-    // TODO: $5 * 2 = $10
     // TODO: amountをプライベートにする
-    // TODO: Dollarの副作用をどうする？
     // TODO: Moneyの丸め処理をどうする？
     #[test]
     fn test_multiplication() {
@@ -29,9 +27,13 @@ mod tests {
         let five = Dollar::new(5);
 
         // act
-        let ten = five.times(2);
+        let product = five.times(2);
 
         // assert
-        assert_eq!(10, ten.amount);
+        assert_eq!(10, product.amount);
+
+        let result = five.times(3);
+
+        assert_eq!(15, result.amount);
     }
 }
