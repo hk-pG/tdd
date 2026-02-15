@@ -32,8 +32,8 @@ mod tests {
         // assert
         assert_eq!(10, product.amount);
 
-        let result = five.times(3);
+        let product = five.times(3);
 
-        assert_eq!(15, result.amount);
+        assert_eq!(15, product.amount);
     }
 }
