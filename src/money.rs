@@ -7,6 +7,20 @@ impl Money {
     pub fn new(amount: i32) -> Money {
         Money { amount }
     }
+
+    pub fn times(&self, multiplier: i32) -> Money {
+        Money {
+            amount: self.amount * multiplier,
+        }
+    }
+
+    pub fn dollar(amount: i32) -> Dollar {
+        Dollar::new(amount)
+    }
+
+    pub fn franc(amount: i32) -> Franc {
+        Franc::new(amount)
+    }
 }
 
 ///
@@ -24,10 +38,8 @@ impl Dollar {
         }
     }
 
-    pub fn times(&self, multiplier: u32) -> Dollar {
-        Self {
-            money: Money::new(self.money.amount * multiplier as i32),
-        }
+    pub fn times(&self, multiplier: u32) -> Money {
+        self.money.times(multiplier as i32)
     }
 }
 
@@ -46,10 +58,8 @@ impl Franc {
         }
     }
 
-    pub fn times(&self, multiplier: u32) -> Franc {
-        Self {
-            money: Money::new(self.money.amount * multiplier as i32),
-        }
+    pub fn times(&self, multiplier: u32) -> Money {
+        self.money.times(multiplier as i32)
     }
 }
 
@@ -58,35 +68,41 @@ mod tests {
     use super::*;
 
     // TODO: $5 + 10 CHF = $10 (レートが2:1の場合)
-    // TODO: Moneyの丸め処理をどうする？
+    // TODO: Money::丸め処理をどうする？
     // TODO: 他のオブジェクトとの等価性比較
     // TODO: DollarとFrancの重複
     // TODO: timesの一般化
     // TODO: DollarとFrancの比較
+    // TODO: 通貨の概念
     #[test]
     fn test_multiplication() {
         // arrange
-        let five = Dollar::new(5);
+        let five = Money::dollar(5);
         // act+assert
-        assert_eq!(Dollar::new(10), five.times(2));
-        assert_eq!(Dollar::new(15), five.times(3));
+        assert_eq!(Money::dollar(10).money, five.times(2));
+        assert_eq!(Money::dollar(15).money, five.times(3));
     }
 
     #[test]
     fn test_equals() {
         // act+assert
-        assert_eq!(Dollar::new(5), Dollar::new(5));
-        assert_ne!(Dollar::new(5), Dollar::new(1));
-        assert_eq!(Franc::new(5), Franc::new(5));
-        assert_ne!(Franc::new(5), Franc::new(1));
+        assert_eq!(Money::dollar(5), Money::dollar(5));
+        assert_ne!(Money::dollar(5), Money::dollar(1));
+        assert_eq!(Money::franc(5), Money::franc(5));
+        assert_ne!(Money::franc(5), Money::franc(1));
     }
 
+    // TODO: enumで比較可能にするまで放置
+    // #[test]
+    // fn test_equals_difference_currency() {
+    //     assert_eq!(Money::dollar(10), Money::franc(10));
+    // }
     #[test]
     fn test_franc_multiplication() {
         // arrange
-        let five = Franc::new(5);
+        let five = Money::franc(5);
         // act+assert
-        assert_eq!(Franc::new(10), five.times(2));
-        assert_eq!(Franc::new(15), five.times(3));
+        assert_eq!(Money::franc(10).money, five.times(2));
+        assert_eq!(Money::franc(15).money, five.times(3));
     }
 }
