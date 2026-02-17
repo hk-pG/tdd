@@ -43,10 +43,6 @@ impl Dollar {
             money: Money::new(amount, String::from("USD")),
         }
     }
-
-    pub fn times(&self, multiplier: u32) -> Money {
-        self.money.times(multiplier as i32)
-    }
 }
 
 ///
@@ -63,10 +59,6 @@ impl Franc {
             money: Money::new(amount, String::from("CHF")),
         }
     }
-
-    pub fn times(&self, multiplier: u32) -> Money {
-        self.money.times(multiplier as i32)
-    }
 }
 
 #[cfg(test)]
@@ -79,13 +71,14 @@ mod tests {
     // TODO: DollarとFrancの重複
     // TODO: timesの一般化
     // TODO: DollarとFrancの比較
+    // TODO: testFrancMultiplicationを削除する(?)
     #[test]
     fn test_multiplication() {
         // arrange
         let five = Money::dollar(5);
         // act+assert
-        assert_eq!(Money::dollar(10).money, five.times(2));
-        assert_eq!(Money::dollar(15).money, five.times(3));
+        assert_eq!(Money::dollar(10).money, five.money.times(2));
+        assert_eq!(Money::dollar(15).money, five.money.times(3));
     }
 
     #[test]
@@ -97,18 +90,20 @@ mod tests {
         assert_ne!(Money::franc(5), Money::franc(1));
     }
 
-    // TODO: enumで比較可能にするまで放置
-    // #[test]
-    // fn test_equals_difference_currency() {
-    //     assert_eq!(Money::dollar(10), Money::franc(10));
-    // }
+    #[test]
+    fn test_equals_difference_currency() {
+        assert_eq!(
+            Money::new(10, "USD".to_string()),
+            Money::new(10, "USD".to_string())
+        );
+    }
     #[test]
     fn test_franc_multiplication() {
         // arrange
         let five = Money::franc(5);
         // act+assert
-        assert_eq!(Money::franc(10).money, five.times(2));
-        assert_eq!(Money::franc(15).money, five.times(3));
+        assert_eq!(Money::franc(10).money, five.money.times(2));
+        assert_eq!(Money::franc(15).money, five.money.times(3));
     }
 
     #[test]
