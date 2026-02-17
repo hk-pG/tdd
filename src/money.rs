@@ -1,17 +1,23 @@
 #[derive(PartialEq, Debug)]
 pub struct Money {
     pub amount: i32,
+    currency: String,
 }
 
 impl Money {
-    pub fn new(amount: i32) -> Money {
-        Money { amount }
+    pub fn new(amount: i32, currency: String) -> Money {
+        Money { amount, currency }
     }
 
     pub fn times(&self, multiplier: i32) -> Money {
         Money {
             amount: self.amount * multiplier,
+            currency: self.currency(),
         }
+    }
+
+    pub fn currency(&self) -> String {
+        self.currency.to_string()
     }
 
     pub fn dollar(amount: i32) -> Dollar {
@@ -34,7 +40,7 @@ pub struct Dollar {
 impl Dollar {
     pub fn new(amount: i32) -> Dollar {
         Self {
-            money: Money::new(amount),
+            money: Money::new(amount, String::from("USD")),
         }
     }
 
@@ -54,7 +60,7 @@ pub struct Franc {
 impl Franc {
     pub fn new(amount: i32) -> Franc {
         Self {
-            money: Money::new(amount),
+            money: Money::new(amount, String::from("CHF")),
         }
     }
 
@@ -73,7 +79,6 @@ mod tests {
     // TODO: DollarとFrancの重複
     // TODO: timesの一般化
     // TODO: DollarとFrancの比較
-    // TODO: 通貨の概念
     #[test]
     fn test_multiplication() {
         // arrange
@@ -104,5 +109,11 @@ mod tests {
         // act+assert
         assert_eq!(Money::franc(10).money, five.times(2));
         assert_eq!(Money::franc(15).money, five.times(3));
+    }
+
+    #[test]
+    pub fn test_currency() {
+        assert_eq!("USD", Money::dollar(1).money.currency());
+        assert_eq!("CHF", Money::franc(1).money.currency());
     }
 }
