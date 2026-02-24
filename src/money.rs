@@ -1,3 +1,4 @@
+use crate::bank::Bank;
 use crate::expression::Expression;
 
 #[derive(PartialEq, Debug)]
@@ -30,10 +31,8 @@ impl Money {
         Money::new(amount, "CHF".to_string())
     }
 
-    /// TODO: インターフェースの大体にtraitを使いたいが、traitをそのまま返すことはできない
-    /// TODO: 新たにdynキーワードとBox<>について勉強する必要がありそう
-    pub fn plus(&self, addend: Money) -> Box<dyn Expression> {
-        Money::new(self.amount + addend.amount, self.currency())
+    pub fn plus(&self, addend: &Money) -> Box<dyn Expression> {
+        Box::new(Money::new(self.amount + addend.amount, self.currency()))
     }
 }
 
@@ -41,8 +40,8 @@ impl Expression for Money {}
 
 #[cfg(test)]
 mod tests {
+
     use super::*;
-    use crate::expression::Expression;
 
     // TODO: $5 + 10 CHF = $10 (レートが2:1の場合)
     // TODO: Money::丸め処理をどうする？
@@ -73,9 +72,9 @@ mod tests {
     #[test]
     pub fn test_simple_addition() {
         let five = Money::dollar(5);
-        let sum: Expression = five.plus(five);
+        let sum: Box<dyn Expression> = five.plus(&five);
         let bank = Bank::new();
-        let reduced: Money = bank.reduce(sum, "USD".to_string());
-        assert_eq!(Money::dollar(10), sum);
+        let reduced: Money = bank.reduce(sum.as_ref(), "USD".to_string());
+        assert_eq!(Money::dollar(10), reduced);
     }
 }
