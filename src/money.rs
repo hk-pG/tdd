@@ -1,6 +1,8 @@
+use crate::expression::Expression;
+
 #[derive(PartialEq, Debug)]
 pub struct Money {
-    pub amount: i32,
+    amount: i32,
     currency: String,
 }
 
@@ -27,11 +29,20 @@ impl Money {
     pub fn franc(amount: i32) -> Money {
         Money::new(amount, "CHF".to_string())
     }
+
+    /// TODO: インターフェースの大体にtraitを使いたいが、traitをそのまま返すことはできない
+    /// TODO: 新たにdynキーワードとBox<>について勉強する必要がありそう
+    pub fn plus(&self, addend: Money) -> Box<dyn Expression> {
+        Money::new(self.amount + addend.amount, self.currency())
+    }
 }
+
+impl Expression for Money {}
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::expression::Expression;
 
     // TODO: $5 + 10 CHF = $10 (レートが2:1の場合)
     // TODO: Money::丸め処理をどうする？
@@ -54,16 +65,17 @@ mod tests {
     }
 
     #[test]
-    fn test_equals_difference_currency() {
-        assert_eq!(
-            Money::new(10, "USD".to_string()),
-            Money::new(10, "USD".to_string())
-        );
-    }
-
-    #[test]
     pub fn test_currency() {
         assert_eq!("USD", Money::dollar(1).currency());
         assert_eq!("CHF", Money::franc(1).currency());
+    }
+
+    #[test]
+    pub fn test_simple_addition() {
+        let five = Money::dollar(5);
+        let sum: Expression = five.plus(five);
+        let bank = Bank::new();
+        let reduced: Money = bank.reduce(sum, "USD".to_string());
+        assert_eq!(Money::dollar(10), sum);
     }
 }
