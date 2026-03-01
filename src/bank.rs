@@ -1,4 +1,4 @@
-use crate::{expression::Expression, money::Money};
+use crate::{expression::Expression, money::Money, sum::Sum};
 
 pub struct Bank {}
 
@@ -8,6 +8,6 @@ impl Bank {
     }
 
     pub fn reduce(&self, source: &dyn Expression, to: String) -> Money {
-        Money::dollar(10)
+        source.reduce(to)
     }
 }
