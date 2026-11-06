@@ -1,8 +1,7 @@
-use crate::bank::Bank;
 use crate::expression::Expression;
 use crate::sum::Sum;
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Clone)]
 pub struct Money {
     pub amount: i32,
     currency: String,
@@ -39,7 +38,7 @@ impl Money {
 
 impl Expression for Money {
     fn reduce(&self, to: String) -> Money {
-        todo!()
+        Money::clone(self)
     }
 }
 
@@ -47,7 +46,9 @@ impl Expression for Money {
 mod tests {
 
     use super::*;
+    use crate::bank::Bank;
 
+    // P97
     // TODO: $5 + 10 CHF = $10 (レートが2:1の場合)
     // TODO: $5 + $5 が Moneyを返す
     // TODO: Money::丸め処理をどうする？
@@ -101,5 +102,12 @@ mod tests {
         let bank = Bank::new();
         let result = bank.reduce(&sum, "USD".to_string());
         assert_eq!(Money::dollar(7), result);
+    }
+
+    #[test]
+    pub fn test_reduce_money() {
+        let bank = Bank::new();
+        let result = bank.reduce(&Money::dollar(1), "USD".to_string());
+        assert_eq!(Money::dollar(1), result);
     }
 }
