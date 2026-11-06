@@ -1,3 +1,4 @@
+use crate::bank::Bank;
 use crate::expression::Expression;
 use crate::money::Money;
 
@@ -20,7 +21,7 @@ impl Sum {
 }
 
 impl Expression for Sum {
-    fn reduce(&self, to: String) -> Money {
+    fn reduce(&self, bank: &Bank, to: String) -> Money {
         let amount = self.augend.amount + self.addend.amount;
         Money::new(amount, to)
     }

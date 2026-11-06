@@ -1,3 +1,4 @@
+use crate::bank::Bank;
 use crate::expression::Expression;
 use crate::sum::Sum;
 
@@ -37,8 +38,9 @@ impl Money {
 }
 
 impl Expression for Money {
-    fn reduce(&self, to: String) -> Money {
-        Money::clone(self)
+    fn reduce(&self, bank: &Bank, to: String) -> Money {
+        let rate = bank.rate(&self.currency, &to);
+        Money::new(self.amount / rate, to)
     }
 }
 
@@ -53,7 +55,7 @@ mod tests {
     // TODO: $5 + $5 が Moneyを返す
     // TODO: Money::丸め処理をどうする？
     // TODO: 他のオブジェクトとの等価性比較
-    // TODO: MOneyを変換して換算を行う
+    // TODO: Moneyを変換して換算を行う
     // TODO: Reduce (Bank, String)
     #[test]
     fn test_multiplication() {
@@ -108,6 +110,14 @@ mod tests {
     pub fn test_reduce_money() {
         let bank = Bank::new();
         let result = bank.reduce(&Money::dollar(1), "USD".to_string());
+        assert_eq!(Money::dollar(1), result);
+    }
+
+    #[test]
+    pub fn test_reduce_money_different_currency() {
+        let bank = Bank::new();
+        bank.addRate("CHF", "USD", 2);
+        let result = bank.reduce(&Money::franc(2), "USD".to_string());
         assert_eq!(Money::dollar(1), result);
     }
 }
