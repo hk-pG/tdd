@@ -1,4 +1,4 @@
-use std::{collections::HashMap, iter::Map};
+use std::collections::HashMap;
 
 use crate::{expression::Expression, money::Money, pair::Pair};
 

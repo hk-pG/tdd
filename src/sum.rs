@@ -21,7 +21,7 @@ impl Sum {
 }
 
 impl Expression for Sum {
-    fn reduce(&self, bank: &Bank, to: String) -> Result<Money, String> {
+    fn reduce(&self, _bank: &Bank, to: String) -> Result<Money, String> {
         let amount = self.augend.amount + self.addend.amount;
         Ok(Money::new(amount, to))
     }
