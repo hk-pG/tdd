@@ -13,8 +13,8 @@ impl Bank {
         }
     }
 
-    pub fn reduce(&self, source: &dyn Expression, to: String) -> Result<Money, String> {
-        source.reduce(self, to)
+    pub fn reduce(&self, source: &dyn Expression, to: &str) -> Result<Money, String> {
+        source.reduce(self, to.as_ref())
     }
 
     pub fn addRate(&mut self, from: impl AsRef<str>, to: impl AsRef<str>, rate: i32) {

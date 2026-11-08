@@ -11,18 +11,11 @@ impl Sum {
     pub fn new(augend: Money, addend: Money) -> Sum {
         Sum { augend, addend }
     }
-
-    pub fn from(augend: i32, addend: i32, currency: String) -> Sum {
-        Sum {
-            augend: Money::new(augend, currency.clone()),
-            addend: Money::new(addend, currency.clone()),
-        }
-    }
 }
 
 impl Expression for Sum {
-    fn reduce(&self, _bank: &Bank, to: String) -> Result<Money, String> {
-        let amount = self.augend.amount + self.addend.amount;
+    fn reduce(&self, bank: &Bank, to: &str) -> Result<Money, String> {
+        let amount = self.augend.reduce(bank, &to)?.amount + self.addend.reduce(bank, to)?.amount;
         Ok(Money::new(amount, to))
     }
 }

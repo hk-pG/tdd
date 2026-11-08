@@ -9,8 +9,11 @@ pub struct Money {
 }
 
 impl Money {
-    pub fn new(amount: i32, currency: String) -> Money {
-        Money { amount, currency }
+    pub fn new(amount: i32, currency: impl Into<String>) -> Money {
+        Money {
+            amount,
+            currency: currency.into(),
+        }
     }
 
     pub fn times(&self, multiplier: i32) -> Money {
@@ -33,14 +36,14 @@ impl Money {
     }
 
     pub fn plus(&self, addend: &Money) -> Box<Sum> {
-        Box::new(Sum::from(self.amount, addend.amount, self.currency()))
+        Box::new(Sum::new(self.clone(), addend.clone()))
     }
 }
 
 impl Expression for Money {
-    fn reduce(&self, bank: &Bank, to: String) -> Result<Money, String> {
+    fn reduce(&self, bank: &Bank, to: &str) -> Result<Money, String> {
         let rate = bank
-            .rate(&self.currency, &to)
+            .rate(&self.currency, to)
             .ok_or_else(|| format!("rate you requested {} is NOT defined.", to))?;
 
         Ok(Money::new(self.amount / rate, to))
@@ -84,7 +87,7 @@ mod tests {
         let five = Money::dollar(5);
         let sum = five.plus(&five);
         let bank = Bank::new();
-        let reduced: Money = bank.reduce(sum.as_ref(), "USD".to_string()).unwrap();
+        let reduced: Money = bank.reduce(sum.as_ref(), "USD").unwrap();
         assert_eq!(Money::dollar(10), reduced);
     }
 
@@ -101,14 +104,14 @@ mod tests {
     pub fn test_reduce_sum() {
         let sum = Sum::new(Money::dollar(3), Money::dollar(4));
         let bank = Bank::new();
-        let result = bank.reduce(&sum, "USD".to_string()).unwrap();
+        let result = bank.reduce(&sum, "USD").unwrap();
         assert_eq!(Money::dollar(7), result);
     }
 
     #[test]
     pub fn test_reduce_money() {
         let bank = Bank::new();
-        let result = bank.reduce(&Money::dollar(1), "USD".to_string()).unwrap();
+        let result = bank.reduce(&Money::dollar(1), "USD").unwrap();
         assert_eq!(Money::dollar(1), result);
     }
 
@@ -116,12 +119,26 @@ mod tests {
     pub fn test_reduce_money_different_currency() {
         let mut bank = Bank::new();
         bank.addRate("CHF", "USD", 2);
-        let result = bank.reduce(&Money::franc(2), "USD".to_string()).unwrap();
+        let result = bank.reduce(&Money::franc(2), "USD").unwrap();
         assert_eq!(Money::dollar(1), result);
     }
 
     #[test]
     pub fn test_identity_rate() {
         assert_eq!(1, Bank::new().rate("USD", "USD").unwrap());
+    }
+
+    #[test]
+    pub fn test_mixed_addition() {
+        let five_bucks = Money::dollar(5);
+        let ten_francs = Money::franc(10);
+
+        let mut bank: Bank = Bank::new();
+        bank.addRate("CHF", "USD", 2);
+
+        let result = bank
+            .reduce(five_bucks.plus(&ten_francs).as_ref(), "USD")
+            .unwrap();
+        assert_eq!(Money::dollar(10), result);
     }
 }
