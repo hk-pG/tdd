@@ -38,9 +38,12 @@ impl Money {
 }
 
 impl Expression for Money {
-    fn reduce(&self, bank: &Bank, to: String) -> Money {
-        let rate = bank.rate(&self.currency, &to);
-        Money::new(self.amount / rate, to)
+    fn reduce(&self, bank: &Bank, to: String) -> Result<Money, String> {
+        let rate = bank
+            .rate(&self.currency, &to)
+            .ok_or_else(|| format!("rate you requested {} is NOT defined.", to))?;
+
+        Ok(Money::new(self.amount / rate, to))
     }
 }
 
@@ -50,13 +53,9 @@ mod tests {
     use super::*;
     use crate::bank::Bank;
 
-    // P97
+    // P108
     // TODO: $5 + 10 CHF = $10 (レートが2:1の場合)
     // TODO: $5 + $5 が Moneyを返す
-    // TODO: Money::丸め処理をどうする？
-    // TODO: 他のオブジェクトとの等価性比較
-    // TODO: Moneyを変換して換算を行う
-    // TODO: Reduce (Bank, String)
     #[test]
     fn test_multiplication() {
         // arrange
@@ -85,7 +84,7 @@ mod tests {
         let five = Money::dollar(5);
         let sum = five.plus(&five);
         let bank = Bank::new();
-        let reduced: Money = bank.reduce(sum.as_ref(), "USD".to_string());
+        let reduced: Money = bank.reduce(sum.as_ref(), "USD".to_string()).unwrap();
         assert_eq!(Money::dollar(10), reduced);
     }
 
@@ -102,22 +101,27 @@ mod tests {
     pub fn test_reduce_sum() {
         let sum = Sum::new(Money::dollar(3), Money::dollar(4));
         let bank = Bank::new();
-        let result = bank.reduce(&sum, "USD".to_string());
+        let result = bank.reduce(&sum, "USD".to_string()).unwrap();
         assert_eq!(Money::dollar(7), result);
     }
 
     #[test]
     pub fn test_reduce_money() {
         let bank = Bank::new();
-        let result = bank.reduce(&Money::dollar(1), "USD".to_string());
+        let result = bank.reduce(&Money::dollar(1), "USD".to_string()).unwrap();
         assert_eq!(Money::dollar(1), result);
     }
 
     #[test]
     pub fn test_reduce_money_different_currency() {
-        let bank = Bank::new();
+        let mut bank = Bank::new();
         bank.addRate("CHF", "USD", 2);
-        let result = bank.reduce(&Money::franc(2), "USD".to_string());
+        let result = bank.reduce(&Money::franc(2), "USD".to_string()).unwrap();
         assert_eq!(Money::dollar(1), result);
+    }
+
+    #[test]
+    pub fn test_identity_rate() {
+        assert_eq!(1, Bank::new().rate("USD", "USD").unwrap());
     }
 }
